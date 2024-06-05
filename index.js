@@ -45,6 +45,31 @@ async function run() {
         res.send(result)
     })
 
+    app.post('/campDetails/join', async(req, res) =>{
+      const info = req.body;
+      const result = await campCollection.insertOne(info);
+      res.send(result)
+
+    })
+
+    //  update no of Participants
+    app.patch('/updateParticipants/:id', async (req, res) => {
+      const id = req.params.id;
+      console.log(id)
+      const query = { _id: new ObjectId(id) };
+      const data = {
+        $inc: {
+          participants: +1
+        }
+      }
+      const result = await campCollection.updateOne(query, data)
+      res.send(result)
+    })
+
+
+
+
+
 
 
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
