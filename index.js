@@ -30,7 +30,21 @@ async function run() {
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
 
+    const userCollection = client.db('MedicineCare').collection('users')
     const campCollection = client.db('MedicineCare').collection('PopularCamps')
+    const participantCollection = client.db('MedicineCare').collection('participantCamps')
+
+        // user related api
+        app.post('/users', async(req, res) =>{
+          const info = req.body;
+          const result = await userCollection.insertOne(info);
+          res.send(result)
+        })
+
+
+
+
+
 
             // camps related api
     app.get('/popularCamps', async(req, res)=>{
@@ -47,9 +61,8 @@ async function run() {
 
     app.post('/campDetails/join', async(req, res) =>{
       const info = req.body;
-      const result = await campCollection.insertOne(info);
+      const result = await participantCollection.insertOne(info);
       res.send(result)
-
     })
 
     //  update no of Participants
@@ -66,6 +79,20 @@ async function run() {
       res.send(result)
     })
 
+    app.get('/participantCamps/:email', async(req, res) =>{
+      // const userEmail = req.params.email;
+      // const query = {email: new ObjectId(email)}
+      const result = await participantCollection.find({userEmail : req.params.email}).toArray();
+      res.send(result)
+
+    })
+
+    app.delete('/participantCamps/:id', async(req, res) =>{
+      const id = req.params.id;
+      const query = {_id : new ObjectId(id)};
+      const result = await participantCollection.deleteOne(query);
+      res.send(result)
+  })
 
 
 
