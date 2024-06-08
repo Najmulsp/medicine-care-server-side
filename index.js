@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 require('dotenv').config();
+var jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 
@@ -34,20 +35,53 @@ async function run() {
     const campCollection = client.db('MedicineCare').collection('PopularCamps')
     const participantCollection = client.db('MedicineCare').collection('participantCamps')
 
+
+        // jwt
+    app.post('/jwt', (req, res)=>{
+      const user = req.body;
+      // console.log(import.meta.process.env.ACCESS_TOKEN_SECRET)
+const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn:'60d'});
+      res.send({token})
+    })
+
+          // middlewares
+    const verifyToken = (req, res, next) =>{
+      console.log("insede verify token", req.headers.authorization);
+      if(!req.headers.authorization){
+        return res.status(401).send({message: 'forbidden access'})
+      }
+      const token = req.headers.authorization.split(' ')[1];
+      jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) =>{
+        if(err){
+          return res.status(401).send({message: 'forbidden access'})
+        }
+        req.decoded = decoded;
+        next()
+      })
+    }
+
+
+
+
+
+
+
         // user related api
         app.post('/users', async(req, res) =>{
           const info = req.body;
+          // check before inserting if the user is already exists or not
+          const query = {email: info.email};
+          const existingUser = await userCollection.findOne(query);
+          if(existingUser){
+            return res.send({message: 'User is already exists', insertedId: null})
+          }
           const result = await userCollection.insertOne(info);
           res.send(result)
         })
 
 
-
-
-
-
             // camps related api
-    app.get('/popularCamps', async(req, res)=>{
+    app.get('/popularCamps',verifyToken, async(req, res)=>{      
         const result = await campCollection.find().toArray();
         res.send(result);
     })
