@@ -194,6 +194,7 @@ const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn:'60d'})
     res.send(result);
   })
 
+            // organizer related api
 
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
