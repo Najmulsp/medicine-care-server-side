@@ -194,7 +194,25 @@ const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn:'60d'})
     res.send(result);
   })
 
+  
+
             // organizer related api
+    app.post('/addACamp', async(req, res) =>{
+      const info = req.body;
+      const result = await campCollection.insertOne(info);
+      res.send(result)
+    }) 
+    //  update organizer profile info
+  app.patch('/updateProfile/:email', async (req, res) => {
+    const query = {email: req.params.email};
+    const updateData = req.body;
+    const options = { upsert: true };
+    const update = {
+      $set: updateData
+    };
+    const result = await userCollection.updateOne(query, update, options)
+    res.send(result)
+  })
 
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
