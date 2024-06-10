@@ -213,6 +213,31 @@ const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn:'60d'})
     const result = await userCollection.updateOne(query, update, options)
     res.send(result)
   })
+      // manage camp updated
+    app.put('/updateCamp/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = {_id : new ObjectId(id)};
+        const updateData = req.body;
+      
+        const update = {
+          $set: updateData
+        };
+        const result = await campCollection.updateOne(query, update)
+        res.send(result)
+    })
+
+    app.delete('/delete/:id', async(req, res) =>{
+      const id = req.params.id;
+      const query = {_id : new ObjectId(id)};
+      const result = await campCollection.deleteOne(query);
+      res.send(result)
+  })
+
+  // manage participants camp
+  app.get('/allParticipantCamps', async(req, res) =>{
+    const result = await participantCollection.find().toArray();
+    res.send(result)
+  })
 
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
