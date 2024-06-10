@@ -27,12 +27,13 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
 
     const userCollection = client.db('MedicineCare').collection('users')
     const campCollection = client.db('MedicineCare').collection('PopularCamps')
     const participantCollection = client.db('MedicineCare').collection('participantCamps')
     const paymentCollection = client.db('MedicineCare').collection('payments')
+    const feedbackCollection = client.db('MedicineCare').collection('feedbacks')
 
 
         // jwt
@@ -194,6 +195,18 @@ const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn:'60d'})
     res.send(result);
   })
 
+            // post participant feedback
+    app.post("/feedbacks", async (req, res) => {
+      const feedback = req.body;
+      const result = await feedbackCollection.insertOne(feedback);
+      res.send(result)
+    });
+
+              // get feedback for testimonial page
+    app.get('/feedbacks', async(req, res)=>{      
+        const result = await feedbackCollection.find().toArray();
+        res.send(result);
+    })
   
 
             // organizer related api
@@ -239,7 +252,53 @@ const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn:'60d'})
     res.send(result)
   })
 
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+  // search functionality
+  app.get('/popularCampsSearch', async (req, res) => {
+    const search = req.query.search;
+    const filter = req.query.filter
+    console.log(search)
+    let query = {
+      name: { $regex: search, $options: 'i' },
+    }
+    if (filter) query.name = filter
+
+    const cursor = campCollection.find(query);
+    const result = await cursor.toArray();
+    res.send(result)
+  })
+
+          // sort functionality
+    // get volunteers  for need volunteers post section
+    // app.get('/sort', async (req, res) => {
+    //   const sort = req.query.sort;
+
+    //   // Determine the sort order
+    //   const sortOrder = sort === 'asc' ? 1 : -1;
+
+    //   // Create the aggregation pipeline
+    //   const pipeline = [
+    //     {
+    //       $addFields: {
+    //         // Convert the 'deadline' string field to a date field
+    //         deadlineDate: {
+    //           $dateFromString: {
+    //             dateString: 'fees'
+    //           }
+    //         }
+    //       }
+    //     },
+    //     {
+    //       $sort: {
+    //         deadlineDate: sortOrder
+    //       }
+    //     }
+    //   ];
+    //   const cursor = campCollection.aggregate(pipeline);
+    //   const result = await cursor.toArray();
+    //   res.send(result);
+    // })
+
+    // console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
