@@ -34,6 +34,7 @@ async function run() {
     const participantCollection = client.db('MedicineCare').collection('participantCamps')
     const paymentCollection = client.db('MedicineCare').collection('payments')
     const feedbackCollection = client.db('MedicineCare').collection('feedbacks')
+    const appointmentCollection = client.db('MedicineCare').collection('appointment')
 
 
         // jwt
@@ -297,6 +298,14 @@ const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn:'60d'})
     //   const result = await cursor.toArray();
     //   res.send(result);
     // })
+
+          // post appointment data
+    app.post('/appointment', async(req, res) =>{
+      const info = req.body;
+      const result = await appointmentCollection.insertOne(info);
+      res.send(result)
+    }) 
+
 
     // console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
